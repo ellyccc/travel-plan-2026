@@ -443,6 +443,12 @@ input[type=file]{display:none}
   </div>
 </div>
 
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="closeLightbox()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;align-items:center;justify-content:center;cursor:zoom-out;backdrop-filter:blur(4px)">
+  <img id="lightbox-img" style="max-width:92vw;max-height:88vh;border-radius:12px;object-fit:contain;box-shadow:0 8px 40px rgba(0,0,0,0.5)" />
+  <div style="position:absolute;top:16px;right:20px;color:#fff;font-size:24px;cursor:pointer;line-height:1" onclick="closeLightbox()">✕</div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -755,7 +761,7 @@ function evCard(di,ei,ev){
   // Photos with delete button
   const photos=(ev.photos||[]).map((p,pi)=>`
     <div class="photo-wrap">
-      <img class="evt-photo" src="${esc(p)}" onerror="this.style.opacity=0.2">
+      <img class="evt-photo" src="${esc(p)}" onclick="openLightbox('${esc(p)}')" style="cursor:zoom-in" onerror="this.style.opacity=0.2">
       ${isReadonly?'':` <button class="photo-del-btn" onclick="delPhoto('evt',${di},${ei},${pi})" title="刪除">✕</button>`}
     </div>`).join('');
   const addBtn=isReadonly?'':`<button class="photo-add-btn" onclick="openPhoto('evt',${di},${ei},-1)">＋</button>`;
@@ -828,7 +834,7 @@ function renderChecklist(kind){
 function checkCard(kind,i,item){
   const photos=(item.photos||[]).map((p,pi)=>`
     <div class="photo-wrap">
-      <img class="ci-photo" src="${esc(p)}" onerror="this.style.opacity=0.2">
+      <img class="ci-photo" src="${esc(p)}" onclick="openLightbox('${esc(p)}')" style="cursor:zoom-in" onerror="this.style.opacity=0.2">
       ${isReadonly?'':` <button class="photo-del-btn" onclick="delPhoto('${kind}',null,${i},${pi})" title="刪除">✕</button>`}
     </div>`).join('');
   const addBtn=isReadonly?'':`<div class="ci-photo-add" onclick="openPhoto('${kind}',null,${i},-1)">＋</div>`;
@@ -866,6 +872,19 @@ function copyShareUrl(){
   navigator.clipboard.writeText(g('shareUrl').value).then(()=>toast('連結已複製！🔗'));
   g('shareOverlay').classList.remove('open');
 }
+
+// ── LIGHTBOX ──
+function openLightbox(src){
+  const lb = g('lightbox');
+  g('lightbox-img').src = src;
+  lb.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox(){
+  g('lightbox').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeLightbox(); });
 
 // ── PHOTO MODAL ──
 function openPhoto(kind,di,ii,pi){photoTarget={kind,di,ii,pi};g('photoUrlIn').value='';g('photoPreview').innerHTML='';g('photoFileIn').value='';g('photoOverlay').classList.add('open');}
